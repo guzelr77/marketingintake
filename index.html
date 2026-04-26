@@ -1,0 +1,1042 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║         MARKETING OS — CLIENT INTAKE AGENT                       ║
+  ║         Configuration: search for YOUR_API_KEY_HERE below        ║
+  ║         Replace it with your Anthropic API key (sk-ant)          ║
+  ║         Then save and upload to GitHub Pages                     ║
+  ╚══════════════════════════════════════════════════════════════════╝
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketing OS — Discovery Session</title>
+<style>
+  :root {
+    --navy:    #1B3A6B;
+    --teal:    #0D7377;
+    --gold:    #C8982A;
+    --white:   #FFFFFF;
+    --bg:      #F0F4F8;
+    --light:   #E8EEF8;
+    --mid:     #6B7280;
+    --dark:    #1A202C;
+    --bubble-agent: #1B3A6B;
+    --bubble-user:  #FFFFFF;
+    --radius:  14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Screens ─────────────────────────────────────────────────────────── */
+  .screen { display: none; flex-direction: column; height: 100vh; }
+  .screen.active { display: flex; }
+
+  /* ── Setup Screen ────────────────────────────────────────────────────── */
+  #setup-screen {
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    background: var(--bg);
+  }
+  .setup-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 48px 40px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 8px 40px rgba(27,58,107,0.12);
+    text-align: center;
+  }
+  .setup-logo { font-size: 28px; font-weight: 900; color: var(--navy); letter-spacing: -0.5px; margin-bottom: 4px; }
+  .setup-sub  { font-size: 13px; color: var(--teal); font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 32px; }
+  .setup-card h2 { font-size: 20px; color: var(--navy); margin-bottom: 10px; }
+  .setup-card p  { font-size: 14px; color: var(--mid); margin-bottom: 28px; line-height: 1.6; }
+  .setup-card label { display: block; text-align: left; font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .setup-card input {
+    width: 100%; padding: 12px 16px;
+    border: 2px solid #E2E8F0; border-radius: 10px;
+    font-size: 14px; color: var(--dark); outline: none;
+    transition: border-color .2s;
+    font-family: monospace;
+  }
+  .setup-card input:focus { border-color: var(--teal); }
+  .setup-note { font-size: 12px; color: var(--mid); margin-top: 8px; text-align: left; margin-bottom: 24px; }
+  .btn-primary {
+    width: 100%; padding: 14px;
+    background: var(--navy); color: #fff;
+    border: none; border-radius: 10px;
+    font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: background .2s;
+  }
+  .btn-primary:hover { background: var(--teal); }
+  .gold-bar { width: 60px; height: 4px; background: var(--gold); border-radius: 2px; margin: 0 auto 28px; }
+
+  /* ── Welcome Screen ──────────────────────────────────────────────────── */
+  #welcome-screen {
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+  .welcome-card {
+    background: #fff;
+    border-radius: 24px;
+    max-width: 580px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 0 12px 50px rgba(27,58,107,0.14);
+  }
+  .welcome-header {
+    background: var(--navy);
+    padding: 40px 40px 32px;
+    text-align: center;
+  }
+  .welcome-header .logo   { font-size: 30px; font-weight: 900; color: #fff; letter-spacing: -0.5px; }
+  .welcome-header .tagline { font-size: 13px; color: #A8C4F0; margin-top: 6px; letter-spacing: 1px; text-transform: uppercase; }
+  .gold-stripe { height: 5px; background: var(--gold); }
+  .welcome-body { padding: 36px 40px; }
+  .welcome-body h2 { font-size: 22px; color: var(--navy); margin-bottom: 12px; }
+  .welcome-body p  { font-size: 15px; color: var(--mid); line-height: 1.7; margin-bottom: 16px; }
+  .welcome-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
+  .chip {
+    background: var(--light);
+    color: var(--navy);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .welcome-body .btn-primary { font-size: 16px; padding: 16px; }
+
+  /* ── Chat Screen ─────────────────────────────────────────────────────── */
+  #chat-screen { background: var(--bg); }
+
+  .chat-header {
+    background: var(--navy);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+  .agent-avatar {
+    width: 38px; height: 38px;
+    background: var(--teal);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .chat-header-info .name    { font-size: 15px; font-weight: 700; color: #fff; }
+  .chat-header-info .status  { font-size: 12px; color: #A8C4F0; }
+  .progress-bar-wrap {
+    margin-left: auto;
+    text-align: right;
+  }
+  .progress-label { font-size: 11px; color: #A8C4F0; margin-bottom: 4px; }
+  .progress-track {
+    width: 120px; height: 5px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--gold);
+    border-radius: 3px;
+    transition: width 0.6s ease;
+    width: 0%;
+  }
+
+  .messages-wrap {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+
+  .msg {
+    display: flex;
+    gap: 10px;
+    max-width: 78%;
+    animation: msgIn .25s ease;
+  }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .msg.agent { align-self: flex-start; }
+  .msg.user  { align-self: flex-end; flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 32px; height: 32px;
+    background: var(--teal);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0; align-self: flex-end;
+  }
+  .msg.user .msg-avatar { background: #E2E8F0; font-size: 12px; }
+
+  .bubble {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 14.5px;
+    line-height: 1.6;
+    max-width: 100%;
+  }
+  .msg.agent .bubble {
+    background: var(--navy);
+    color: #fff;
+    border-bottom-left-radius: 4px;
+  }
+  .msg.user .bubble {
+    background: #fff;
+    color: var(--dark);
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  /* Typing indicator */
+  .typing-dots { display: flex; gap: 4px; padding: 4px 0; }
+  .typing-dots span {
+    width: 7px; height: 7px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 50%;
+    animation: dot .9s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: .15s; }
+  .typing-dots span:nth-child(3) { animation-delay: .30s; }
+  @keyframes dot { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+
+  .input-area {
+    padding: 14px 16px;
+    background: #fff;
+    border-top: 1px solid #E2E8F0;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+  #msg-input {
+    flex: 1;
+    border: 2px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 11px 16px;
+    font-size: 14.5px;
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    transition: border-color .2s;
+    max-height: 120px;
+    min-height: 44px;
+    line-height: 1.5;
+  }
+  #msg-input:focus { border-color: var(--teal); }
+  #send-btn {
+    background: var(--navy);
+    color: #fff; border: none;
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background .2s;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #send-btn:hover:not(:disabled) { background: var(--teal); }
+  #send-btn:disabled { background: #C4CDD8; cursor: default; }
+
+  /* ── Results Screen ──────────────────────────────────────────────────── */
+  #results-screen { overflow: hidden; }
+  .results-header {
+    background: var(--navy);
+    padding: 20px 24px;
+    flex-shrink: 0;
+  }
+  .results-header h1 { font-size: 18px; color: #fff; font-weight: 800; }
+  .results-header p  { font-size: 13px; color: #A8C4F0; margin-top: 3px; }
+
+  .results-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 20px 32px;
+  }
+
+  .success-badge {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    border-left: 5px solid var(--teal);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .success-badge h2 { font-size: 17px; color: var(--navy); margin-bottom: 6px; }
+  .success-badge p  { font-size: 14px; color: var(--mid); line-height: 1.6; }
+
+  .brain-section {
+    background: #fff;
+    border-radius: 14px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+  .brain-section-header {
+    background: var(--navy);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brain-section-header .icon { font-size: 16px; }
+  .brain-section-header .title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .brain-section-body { padding: 16px 18px; }
+  .brain-field { margin-bottom: 12px; }
+  .brain-field:last-child { margin-bottom: 0; }
+  .brain-field label { font-size: 11px; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+  .brain-field .val { font-size: 14px; color: var(--dark); line-height: 1.5; }
+  .brain-field .val.empty { color: #C4CDD8; font-style: italic; }
+  .tag {
+    display: inline-block;
+    background: var(--light);
+    color: var(--navy);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 2px 4px 2px 0;
+  }
+  .tag.gold { background: #FDF3E0; color: #8B6914; }
+
+  .results-actions {
+    display: flex;
+    gap: 10px;
+    padding: 0 20px 20px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .btn-copy {
+    flex: 1;
+    padding: 13px;
+    background: var(--teal);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s;
+    min-width: 140px;
+  }
+  .btn-copy:hover { background: var(--navy); }
+  .btn-outline {
+    flex: 1;
+    padding: 13px;
+    background: transparent;
+    color: var(--navy);
+    border: 2px solid var(--navy);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+    min-width: 140px;
+  }
+  .btn-outline:hover { background: var(--navy); color: #fff; }
+
+  /* Settings cog */
+  .cog-btn {
+    position: fixed; bottom: 16px; right: 16px;
+    width: 36px; height: 36px;
+    background: rgba(27,58,107,0.12);
+    border: none; border-radius: 50%;
+    cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--mid); transition: background .2s;
+    z-index: 100;
+  }
+  .cog-btn:hover { background: rgba(27,58,107,0.2); }
+
+  /* Error toast */
+  .toast {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+    background: #E53E3E; color: #fff;
+    padding: 10px 20px; border-radius: 10px;
+    font-size: 13px; font-weight: 600;
+    display: none; z-index: 200;
+  }
+  .toast.show { display: block; }
+
+  @media (max-width: 500px) {
+    .setup-card, .welcome-body { padding: 28px 22px; }
+    .msg { max-width: 90%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Setup Screen ───────────────────────────────────────────────────── -->
+<div id="setup-screen" class="screen active">
+  <div class="setup-card">
+    <div class="setup-logo">MARKETING OS</div>
+    <div class="setup-sub">Admin Configuration</div>
+    <div class="gold-bar"></div>
+    <h2>Configure your Intake Agent</h2>
+    <p>Enter your Anthropic API key to activate the client discovery agent. This is stored only in your browser and never shared.</p>
+    <label for="api-key-input">Anthropic API Key</label>
+    <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off" />
+    <p class="setup-note">Get your key at console.anthropic.com → API Keys. This screen appears only once per device.</p>
+    <button class="btn-primary" onclick="saveSetup()">Activate Agent</button>
+  </div>
+</div>
+
+<!-- ── Welcome Screen ────────────────────────────────────────────────── -->
+<div id="welcome-screen" class="screen">
+  <div class="welcome-card">
+    <div class="welcome-header">
+      <div class="logo">MARKETING OS</div>
+      <div class="tagline">AI-Powered Marketing Department</div>
+    </div>
+    <div class="gold-stripe"></div>
+    <div class="welcome-body">
+      <h2>Welcome to your Discovery Session</h2>
+      <p>Our AI agent will guide you through a 30-minute conversation covering your business, customers, positioning, brand voice, and goals. Your answers build your <strong>Brand Brain</strong> — the foundation of your entire Marketing OS platform.</p>
+      <div class="welcome-chips">
+        <span class="chip">🏢 Your Business</span>
+        <span class="chip">🎯 Ideal Customer</span>
+        <span class="chip">⚡ Differentiation</span>
+        <span class="chip">💎 Value Proposition</span>
+        <span class="chip">🎨 Brand Voice</span>
+        <span class="chip">📣 Current Marketing</span>
+        <span class="chip">🚀 Goals</span>
+      </div>
+      <p style="font-size:13px; color:var(--mid);">Answer honestly, not politely — candid beats polished every time. You can skip anything and cover it in your live session with the team.</p>
+      <button class="btn-primary" style="margin-top:20px;" onclick="startChat()">Begin Discovery Session →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Chat Screen ────────────────────────────────────────────────────── -->
+<div id="chat-screen" class="screen">
+  <div class="chat-header">
+    <div class="agent-avatar">🤖</div>
+    <div class="chat-header-info">
+      <div class="name">Marketing OS Agent</div>
+      <div class="status" id="status-text">Initializing...</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-label" id="progress-label">Getting started</div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+  </div>
+
+  <div class="messages-wrap" id="messages"></div>
+
+  <div class="input-area">
+    <textarea id="msg-input" placeholder="Type your answer here…" rows="1"
+      onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button id="send-btn" onclick="sendMessage()" disabled>➤</button>
+  </div>
+</div>
+
+<!-- ── Results Screen ─────────────────────────────────────────────────── -->
+<div id="results-screen" class="screen">
+  <div class="results-header">
+    <h1>🧠 Brand Brain — Discovery Complete</h1>
+    <p id="results-subtitle">Interview summary ready for review</p>
+  </div>
+  <div class="results-body" id="results-body"></div>
+  <div class="results-actions">
+    <button class="btn-copy" onclick="copyJSON()">📋 Copy Brand Brain JSON</button>
+    <button class="btn-outline" onclick="downloadJSON()">⬇️ Download as File</button>
+    <button class="btn-outline" onclick="newSession()">🔄 New Session</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<button class="cog-btn" onclick="resetSetup()" title="Admin settings">⚙️</button>
+
+<script>
+// ── System prompt ──────────────────────────────────────────────────────────
+const SYSTEM_PROMPT = `You are the Marketing OS Discovery Agent — a warm, professional AI interviewer conducting client onboarding for Marketing OS, an AI-powered marketing agency.
+
+Your job: run a structured but natural conversation to gather everything needed to build this client's Brand Brain — the knowledge base that trains every AI agent in their Marketing OS platform. You follow the structure of Marketing OS's official 35-question Client Intake Questionnaire.
+
+YOUR PERSONALITY:
+- Warm, professional, and curious — like a senior consultant who genuinely wants to understand the client's world
+- You dig for the specific detail behind every vague answer
+- Brief affirming reactions to good answers ("That's really useful." / "Perfect, that gives us a lot to work with.")
+- Efficient — the conversation should feel like 30 minutes well spent
+
+CRITICAL RULES — follow these exactly:
+1. Ask ONE question per message. Always. No exceptions.
+2. Keep messages to 2–4 sentences maximum, including the question.
+3. When an answer is vague (e.g. "we help companies grow", "we save time"), ask: "Can you be more specific — maybe a concrete example or an actual number?"
+4. When you have enough depth on a topic, transition naturally to the next question.
+5. If they're unsure, say "No worries — we'll dig into that in your live session" and move on.
+6. Never list multiple questions. One at a time.
+7. Use their name occasionally after they share it.
+8. For questions with set options (revenue model, business stage, channels, budget), present the options in a clean list and ask them to pick one or more.
+
+HOW TO START:
+Introduce yourself warmly. Explain this will take about 30 minutes and their answers directly build their Brand Brain. Then ask for their name.
+
+QUESTIONS TO COVER IN ORDER:
+
+SECTION 1 — YOUR BUSINESS (Q01–Q05):
+Q01: What is their company name, website URL, and year founded?
+Q02: Ask them to describe what they sell in one sentence — explain it like telling a smart friend at dinner, not pitching an investor.
+Q03: What specific problem does their product or service solve? Push for precision if vague — "we save time" is too broad; "we eliminate the 4 hours a week marketing teams spend manually compiling reports" is the right level.
+Q04: What is their revenue model? Present these options: Monthly or annual subscription (SaaS) / One-time purchase / Project-based or retainer / Usage-based or transactional / Marketplace or commission / Freemium with paid upgrade / Other.
+Q05: What stage is the business at? Options: Pre-revenue (building and validating) / $0–$1M ARR / $1M–$5M ARR / $5M–$20M ARR / $20M+ ARR.
+
+SECTION 2 — YOUR IDEAL CUSTOMER (Q06–Q12):
+Q06: Describe the ideal customer company — industry, company size (employees and/or revenue), geography, and stage of growth.
+Q07: Who inside that company makes the buying decision? Job title, seniority, function. Is there a buying committee? Who influences but doesn't decide?
+Q08: What is the #1 pain or problem that drives them to look for a solution? What does it cost them — in money, time, stress, or missed opportunity?
+Q09: What exact words does the customer use to describe their problem? Ask for real quotes from sales calls, customer emails, reviews, or support tickets if they have them.
+Q10: What do customers try before finding them? Competitors they consider, workarounds, or simply doing nothing — what is the status quo being replaced?
+Q11: What objections or doubts come up before customers buy? Price? Trust? Internal buy-in needed? Fear of switching? Complexity?
+Q12: What does success look like for their customer 90 days after buying? Ask for something specific and measurable — what has changed in their work or numbers that they would tell a colleague about?
+
+SECTION 3 — DIFFERENTIATION & POSITIONING (Q13–Q17):
+Q13: Ask them to name their top 3 competitors and each one's biggest weakness. These can be direct competitors, alternatives the buyer considers, or even "doing nothing" or "building in-house."
+Q14: What do they do better than anyone else in their category? Not a feature list — the strategic capability they own that a well-funded competitor could not easily copy in 12 months.
+Q15: What proof do they have? Ask for every claim they can back up — client results with numbers, certifications, case study outcomes, retention rates, NPS scores, published research, awards, media mentions.
+Q16: What is the one thing customers would miss most if this company disappeared tomorrow?
+Q17: Ask them to complete this sentence: "We are the only [category] that [differentiator] — so that [specific customer outcome]." Encourage 2–3 versions if they can manage it.
+
+SECTION 4 — VALUE PROPOSITION (Q18–Q21):
+Q18: What specific, measurable outcome does their customer get? Push for concrete numbers — "20% reduction in churn within 60 days" beats "improved retention."
+Q19: How long does it take to see meaningful results after buying? When do customers get their first win? When do they experience the full value?
+Q20: What is the cost — financial, operational, or competitive — of NOT solving this problem? What happens to the buyer if they do nothing for another year?
+Q21: Ask them to complete this sentence: "We help [specific customer] achieve [measurable outcome] without [common trade-off or sacrifice] — in [timeframe]."
+
+SECTION 5 — BRAND PERSONALITY & VOICE (Q22–Q26):
+Q22: Ask for 5 words that describe their brand's personality. These become the guardrails for every piece of content.
+Q23: If their brand were a person, who would they be? Ask for a description of that person's background, expertise, and personality — not a celebrity name.
+Q24: Ask them to name 2–3 brands from any industry whose communication style they admire — and to say specifically why. What do they like? Tone? Confidence? Simplicity? Specificity?
+Q25: Ask them to name 2 brands whose communication style they dislike — and why. Too promotional? Too academic? Too generic? Too salesy?
+Q26: What should their brand NEVER say or do? Specific words, phrases, claims, or behaviors that feel completely wrong for the brand.
+
+SECTION 6 — CURRENT MARKETING & CHANNELS (Q27–Q31):
+Q27: Which marketing channels are they currently using? Present these options (they can pick multiple): LinkedIn organic content / LinkedIn paid advertising / Email newsletter / Cold email outreach / SEO and blog content / Google Ads and paid search / Events and conferences / Partnerships and referrals / PR and media coverage / No active marketing yet / Other.
+Q28: What content or marketing activity has worked best so far — even if the results were small? A post that got real engagement, an email that triggered replies, a talk that led to a conversation?
+Q29: What have they tried that clearly did not work — and why do they think it failed?
+Q30: How do most new customers find them today? Word of mouth, LinkedIn, inbound search, outbound prospecting?
+Q31: What brand assets do they already have? Logo files, color palette, existing brand guide, presentation templates, photography, website copy they like?
+
+SECTION 7 — GOALS & SUCCESS (Q32–Q35):
+Q32: What is their #1 marketing goal for the next 6 months? Push for specifics — not "more leads" but actual numbers like "10 qualified demo requests per month from LinkedIn."
+Q33: What does success look like at 12 months? Revenue targets, number of new customers, visibility goals, specific milestones they would be proud to hit.
+Q34: What is their current monthly marketing budget, excluding team salaries? Options: No dedicated budget / Under $1,000/month / $1,000–$5,000/month / $5,000–$15,000/month / $15,000–$50,000/month / $50,000+/month.
+Q35: What is the single biggest thing holding them back from growing faster? Encourage candor — this is the most useful answer in the entire session and it helps determine what to build first.
+
+WHEN YOU ARE DONE:
+After covering all 7 sections, close warmly. Thank them for their time. Tell them the Marketing OS team will review their Brand Brain before the live onboarding session and they should expect to hear from Guzel Adams within 24 hours.
+
+Then output a structured summary using EXACTLY this format (required for system processing):
+[BRAND_BRAIN_DATA]
+{JSON object}
+[/BRAND_BRAIN_DATA]
+
+The JSON must use this exact structure:
+{
+  "client_name": "",
+  "interview_date": "",
+  "business": {
+    "company": "",
+    "website": "",
+    "year_founded": "",
+    "what_they_sell": "",
+    "problem_solved": "",
+    "revenue_model": "",
+    "stage": ""
+  },
+  "icp": {
+    "ideal_customer_company": "",
+    "decision_maker": "",
+    "primary_pain": "",
+    "customer_language": [],
+    "alternatives_tried": "",
+    "top_objections": [],
+    "success_at_90_days": ""
+  },
+  "positioning": {
+    "competitors": [{"name":"","weakness":""}],
+    "key_differentiator": "",
+    "proof_points": [],
+    "what_customers_would_miss": "",
+    "positioning_statement": ""
+  },
+  "value_prop": {
+    "measurable_outcome": "",
+    "time_to_results": "",
+    "cost_of_inaction": "",
+    "draft_statement": ""
+  },
+  "brand_voice": {
+    "personality_words": [],
+    "brand_as_person": "",
+    "admired_brands": [{"brand":"","why":""}],
+    "disliked_brands": [{"brand":"","why":""}],
+    "never_do": ""
+  },
+  "current_marketing": {
+    "active_channels": [],
+    "whats_working": "",
+    "what_failed": "",
+    "how_customers_find_them": "",
+    "existing_assets": ""
+  },
+  "goals": {
+    "six_month_goal": "",
+    "twelve_month_success": "",
+    "monthly_budget": "",
+    "biggest_obstacle": ""
+  },
+  "key_quotes": [],
+  "agent_notes": "",
+  "recommended_first_focus": ""
+}`;
+
+// ── Configuration ──────────────────────────────────────────────────────────
+// To embed your key for a hosted/client version, replace YOUR_API_KEY_HERE
+// with your Anthropic API key (starts with sk-ant-).
+// Otherwise leave it as-is — users will enter their key via the setup screen.
+const HOSTED_API_KEY = 'YOUR_API_KEY_HERE';
+
+// ── State ──────────────────────────────────────────────────────────────────
+let apiKey = '';
+let messages = [];
+let brandBrainData = null;
+let isLoading = false;
+let turnCount = 0;
+
+const SECTIONS = [
+  "Getting started",
+  "Your business","Your business","Your business","Your business",
+  "Your customer","Your customer","Your customer","Your customer",
+  "Your customer","Your customer",
+  "Differentiation","Differentiation","Differentiation","Differentiation",
+  "Value proposition","Value proposition","Value proposition",
+  "Brand voice","Brand voice","Brand voice","Brand voice",
+  "Current marketing","Current marketing","Current marketing",
+  "Goals & success","Goals & success","Goals & success",
+  "Wrapping up"
+];
+
+// ── Initialization ─────────────────────────────────────────────────────────
+window.onload = function() {
+  const isKeySet = HOSTED_API_KEY && HOSTED_API_KEY !== 'YOUR_API_KEY_HERE';
+  apiKey = isKeySet ? HOSTED_API_KEY : (localStorage.getItem('mos_api_key') || '');
+  if (apiKey) showScreen('welcome');
+  else showScreen('setup');
+};
+
+// ── Screen management ──────────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(name + '-screen').classList.add('active');
+}
+
+// ── Setup ──────────────────────────────────────────────────────────────────
+function saveSetup() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    showToast('Please enter a valid Anthropic API key (starts with sk-ant-)');
+    return;
+  }
+  localStorage.setItem('mos_api_key', key);
+  apiKey = key;
+  showScreen('welcome');
+}
+
+function resetSetup() {
+  if (confirm('Reset API key configuration?')) {
+    localStorage.removeItem('mos_api_key');
+    apiKey = '';
+    document.getElementById('api-key-input').value = '';
+    showScreen('setup');
+  }
+}
+
+// ── Start chat ─────────────────────────────────────────────────────────────
+async function startChat() {
+  showScreen('chat');
+  messages = [];
+  turnCount = 0;
+  document.getElementById('messages').innerHTML = '';
+  document.getElementById('status-text').textContent = 'Active session';
+  updateProgress(0);
+  await agentTurn();
+}
+
+function newSession() {
+  messages = [];
+  brandBrainData = null;
+  startChat();
+}
+
+// ── Message rendering ──────────────────────────────────────────────────────
+function addMessage(role, text) {
+  const wrap = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  const avatarChar = role === 'agent' ? '🤖' : '👤';
+  div.innerHTML = `
+    <div class="msg-avatar">${avatarChar}</div>
+    <div class="bubble">${formatText(text)}</div>
+  `;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function formatText(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\n/g,'<br>');
+}
+
+function showTyping() {
+  const wrap = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg agent';
+  div.id = 'typing-indicator';
+  div.innerHTML = `
+    <div class="msg-avatar">🤖</div>
+    <div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>
+  `;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function addErrorMessage(errMsg, isAuthError) {
+  const wrap = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg agent';
+  const actionBtn = isAuthError
+    ? `<br><br><button onclick="resetSetup()" style="background:#fff;color:#C53030;border:none;padding:7px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;">🔑 Update API Key</button>`
+    : '';
+  div.innerHTML = `
+    <div class="msg-avatar" style="background:#C53030;">⚠️</div>
+    <div class="bubble" style="background:#C53030; color:#fff; border-bottom-left-radius:4px;">
+      ${formatText(errMsg)}${actionBtn}
+    </div>
+  `;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+// ── Progress ───────────────────────────────────────────────────────────────
+function updateProgress(turn) {
+  const max = 40;
+  const pct = Math.min(100, Math.round((turn / max) * 100));
+  document.getElementById('progress-fill').style.width = pct + '%';
+  const idx = Math.min(SECTIONS.length - 1, Math.floor((turn / max) * SECTIONS.length));
+  document.getElementById('progress-label').textContent = SECTIONS[idx];
+}
+
+// ── API call ───────────────────────────────────────────────────────────────
+async function callClaude(msgHistory) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1200,
+      system: SYSTEM_PROMPT,
+      messages: msgHistory
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    const status = response.status;
+    let msg;
+    if (status === 401) {
+      msg = 'Your API key is invalid or expired. Please update it using the button below.';
+    } else if (status === 403) {
+      msg = "Your API key doesn't have permission to use this model. Check your key at console.anthropic.com.";
+    } else if (status === 429) {
+      msg = 'Rate limit reached — please wait a moment, then send your message again.';
+    } else if (status >= 500) {
+      msg = "Anthropic's servers had a hiccup. Please try again in a moment.";
+    } else {
+      msg = err.error?.message || 'API error ' + status;
+    }
+    const error = new Error(msg);
+    error.status = status;
+    throw error;
+  }
+
+  const data = await response.json();
+  return data.content[0].text;
+}
+
+// ── Agent turn ─────────────────────────────────────────────────────────────
+async function agentTurn() {
+  isLoading = true;
+  document.getElementById('send-btn').disabled = true;
+  document.getElementById('msg-input').disabled = true;
+  showTyping();
+
+  // The API requires at least one message — add a silent trigger on first turn
+  const msgHistory = messages.length === 0
+    ? [{ role: 'user', content: 'Please begin the discovery session.' }]
+    : messages;
+
+  try {
+    const reply = await callClaude(msgHistory);
+    removeTyping();
+
+    // Check for Brand Brain data
+    const bbMatch = reply.match(/\[BRAND_BRAIN_DATA\]([\s\S]*?)\[\/BRAND_BRAIN_DATA\]/);
+    if (bbMatch) {
+      const visibleText = reply.replace(/\[BRAND_BRAIN_DATA\][\s\S]*?\[\/BRAND_BRAIN_DATA\]/, '').trim();
+      if (visibleText) addMessage('agent', visibleText);
+
+      try {
+        brandBrainData = JSON.parse(bbMatch[1].trim());
+        brandBrainData.interview_date = new Date().toLocaleDateString('en-US', {
+          year:'numeric', month:'long', day:'numeric'
+        });
+      } catch(e) {
+        brandBrainData = { raw: bbMatch[1].trim(), parse_error: e.message };
+      }
+
+      if (messages.length === 0) messages.push({ role: 'user', content: 'Please begin the discovery session.' });
+      messages.push({ role: 'assistant', content: reply });
+      setTimeout(showResults, 1500);
+    } else {
+      addMessage('agent', reply);
+      if (messages.length === 0) messages.push({ role: 'user', content: 'Please begin the discovery session.' });
+      messages.push({ role: 'assistant', content: reply });
+      turnCount++;
+      updateProgress(turnCount);
+      document.getElementById('msg-input').disabled = false;
+      document.getElementById('send-btn').disabled = false;
+      document.getElementById('msg-input').focus();
+    }
+  } catch (err) {
+    removeTyping();
+    const isAuthError = err.status === 401 || err.status === 403;
+    addErrorMessage(err.message, isAuthError);
+    document.getElementById('msg-input').disabled = false;
+    document.getElementById('send-btn').disabled = false;
+  }
+  isLoading = false;
+}
+
+// ── User sends message ─────────────────────────────────────────────────────
+async function sendMessage() {
+  if (isLoading) return;
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  addMessage('user', text);
+  messages.push({ role: 'user', content: text });
+  input.value = '';
+  input.style.height = 'auto';
+  await agentTurn();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ── Results ────────────────────────────────────────────────────────────────
+function showResults() {
+  showScreen('results');
+  const d = brandBrainData;
+  if (!d) return;
+
+  document.getElementById('results-subtitle').textContent =
+    (d.client_name ? d.client_name + ' — ' : '') + (d.interview_date || '');
+
+  const body = document.getElementById('results-body');
+  body.innerHTML = `
+    <div class="success-badge">
+      <h2>✅ Discovery complete!</h2>
+      <p>The Brand Brain below summarizes everything captured in this session. Review it before the live onboarding call, then use it to populate the client's Marketing OS workspace.</p>
+    </div>
+
+    ${section('🏢', 'Business', [
+      field('Company', d.business?.company),
+      field('Website', d.business?.website),
+      field('Year founded', d.business?.year_founded),
+      field('What they sell', d.business?.what_they_sell),
+      field('Problem solved', d.business?.problem_solved),
+      field('Revenue model', d.business?.revenue_model),
+      field('Stage', d.business?.stage),
+    ])}
+
+    ${section('🎯', 'Ideal Customer (ICP)', [
+      field('Ideal customer', d.icp?.ideal_customer_company),
+      field('Decision maker', d.icp?.decision_maker),
+      field('Primary pain', d.icp?.primary_pain),
+      field('Customer language', tags(d.icp?.customer_language)),
+      field('Alternatives tried', d.icp?.alternatives_tried),
+      field('Top objections', tags(d.icp?.top_objections)),
+      field('Success at 90 days', d.icp?.success_at_90_days),
+    ])}
+
+    ${section('⚡', 'Differentiation & Positioning', [
+      field('Competitors', competitors(d.positioning?.competitors)),
+      field('Key differentiator', d.positioning?.key_differentiator),
+      field('Proof points', tags(d.positioning?.proof_points)),
+      field('What customers would miss', d.positioning?.what_customers_would_miss),
+      field('Positioning statement', d.positioning?.positioning_statement),
+    ])}
+
+    ${section('💎', 'Value Proposition', [
+      field('Measurable outcome', d.value_prop?.measurable_outcome),
+      field('Time to results', d.value_prop?.time_to_results),
+      field('Cost of inaction', d.value_prop?.cost_of_inaction),
+      field('Draft statement', d.value_prop?.draft_statement),
+    ])}
+
+    ${section('🎨', 'Brand Voice & Personality', [
+      field('Personality words', tags(d.brand_voice?.personality_words, true)),
+      field('Brand as a person', d.brand_voice?.brand_as_person),
+      field('Admired brands', admiredBrands(d.brand_voice?.admired_brands)),
+      field('Disliked brands', admiredBrands(d.brand_voice?.disliked_brands)),
+      field('Never do', d.brand_voice?.never_do),
+    ])}
+
+    ${section('📣', 'Current Marketing', [
+      field('Active channels', tags(d.current_marketing?.active_channels)),
+      field("What's working", d.current_marketing?.whats_working),
+      field("What didn't work", d.current_marketing?.what_failed),
+      field('How customers find them', d.current_marketing?.how_customers_find_them),
+      field('Existing brand assets', d.current_marketing?.existing_assets),
+    ])}
+
+    ${section('🚀', 'Goals & Success', [
+      field('6-month goal', d.goals?.six_month_goal),
+      field('12-month success', d.goals?.twelve_month_success),
+      field('Monthly budget', d.goals?.monthly_budget),
+      field('Biggest obstacle', d.goals?.biggest_obstacle),
+    ])}
+
+    ${d.key_quotes?.length ? section('💬', 'Key Quotes', [
+      field('Direct quotes', tags(d.key_quotes, false, true))
+    ]) : ''}
+
+    ${(d.agent_notes || d.recommended_first_focus) ? section('📝', 'Agent Notes', [
+      field('Observations', d.agent_notes),
+      field('Recommended first focus', d.recommended_first_focus),
+    ]) : ''}
+  `;
+}
+
+function section(icon, title, fields) {
+  return `<div class="brain-section">
+    <div class="brain-section-header">
+      <span class="icon">${icon}</span>
+      <span class="title">${title}</span>
+    </div>
+    <div class="brain-section-body">${fields.join('')}</div>
+  </div>`;
+}
+
+function field(label, value) {
+  if (!value || value === '' || (Array.isArray(value) && value.length === 0)) {
+    return `<div class="brain-field">
+      <label>${label}</label>
+      <div class="val empty">Not captured — discuss in live session</div>
+    </div>`;
+  }
+  if (typeof value === 'string' && value.startsWith('<')) {
+    return `<div class="brain-field"><label>${label}</label><div class="val">${value}</div></div>`;
+  }
+  return `<div class="brain-field">
+    <label>${label}</label>
+    <div class="val">${value}</div>
+  </div>`;
+}
+
+function tags(arr, gold, quote) {
+  if (!arr || !arr.length) return '';
+  return arr.map(t => {
+    const cls = 'tag' + (gold ? ' gold' : '');
+    const txt = quote ? `"${t}"` : t;
+    return `<span class="${cls}">${txt}</span>`;
+  }).join('');
+}
+
+function competitors(arr) {
+  if (!arr || !arr.length) return '';
+  return arr.map(c =>
+    `<div style="margin-bottom:6px"><strong style="color:var(--navy)">${c.name || '?'}</strong>
+     <span style="color:var(--mid); font-size:13px"> — ${c.weakness || 'weakness not captured'}</span></div>`
+  ).join('');
+}
+
+function admiredBrands(arr) {
+  if (!arr || !arr.length) return '';
+  return arr.map(b =>
+    `<div style="margin-bottom:6px"><strong style="color:var(--navy)">${b.brand || '?'}</strong>
+     <span style="color:var(--mid); font-size:13px"> — ${b.why || ''}</span></div>`
+  ).join('');
+}
+
+function copyJSON() {
+  const json = JSON.stringify(brandBrainData, null, 2);
+  navigator.clipboard.writeText(json).then(() => showToast('✅ Copied to clipboard!', false));
+}
+
+function downloadJSON() {
+  const json = JSON.stringify(brandBrainData, null, 2);
+  const name = (brandBrainData?.business?.company || 'client').replace(/\s+/g,'_');
+  const blob = new Blob([json], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Brand_Brain_' + name + '.json';
+  a.click();
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function showToast(msg, error = true) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = error ? '#E53E3E' : '#0D7377';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
