@@ -620,6 +620,11 @@ The JSON must use this exact structure:
 // Otherwise leave it as-is — users will enter their key via the setup screen.
 const HOSTED_API_KEY = 'YOUR_API_KEY_HERE';
 
+// ── Notion / Make.com webhook ──────────────────────────────────────────────
+// Paste your Make.com webhook URL below after completing the Make.com setup.
+// Leave blank and the chatbot still works — results just won't auto-post to Notion.
+const WEBHOOK_URL = 'https://hook.us2.make.com/opybtxrakkl6x4rce1ew3ro8ohlfo5z7';
+
 // ── State ──────────────────────────────────────────────────────────────────
 let apiKey = '';
 let messages = [];
@@ -825,6 +830,7 @@ async function agentTurn() {
         brandBrainData.interview_date = new Date().toLocaleDateString('en-US', {
           year:'numeric', month:'long', day:'numeric'
         });
+        sendToWebhook(brandBrainData); // Auto-post to Notion via Make.com
       } catch(e) {
         brandBrainData = { raw: bbMatch[1].trim(), parse_error: e.message };
       }
@@ -876,6 +882,21 @@ function handleKey(e) {
 function autoResize(el) {
   el.style.height = 'auto';
   el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ── Send to Notion via Make.com webhook ────────────────────────────────────
+async function sendToWebhook(data) {
+  if (!WEBHOOK_URL) return; // Skip if not configured
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    showToast('✅ Sent to Notion!', false);
+  } catch (e) {
+    showToast('⚠️ Notion sync failed — check webhook URL', true);
+  }
 }
 
 // ── Results ────────────────────────────────────────────────────────────────
